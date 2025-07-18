@@ -1,33 +1,44 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-function App() {
-  const [count, setCount] = useState(0)
+//使用node server.js
+
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Login from './Login';
+import Dashboard from './DashBoard';
+import Register from './Register'; // 引入注册页面
+import './App.css';
+
+const App = () => {
+  const [username, setUsername] = useState(null);
+
+  const handleLogin = (user) => {
+    setUsername(user);
+  };
+
+  const handleLogout = () => {
+    setUsername(null);
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <Router>
+      <div className="min-h-screen bg-gray-50">
+        {/* 页面内容 */}
+        <main className="container mx-auto p-6">
+          <Routes>
+            <Route
+              path="/login"
+              element={!username ? <Login onLogin={handleLogin} /> : <Navigate to="/dashboard" />}
+            />
+            <Route
+              path="/dashboard"
+              element={username ? <Dashboard username={username} onLogout={handleLogout} /> : <Navigate to="/login" />}
+            />
+            <Route path="/register" element={<Register />} />
+            <Route path="*" element={<Navigate to="/login" />} />
+          </Routes>
+        </main>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
-export default App
+    </Router>
+  );
+};
+
+export default App;
