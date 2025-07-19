@@ -4,6 +4,10 @@ import loginBackground from './assets/LoginBackGround.png'; // 导入背景图�
 const Register = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+
+  const [password2, setPassword2] = useState(''); // 二次确认
+  const [email, setEmail] = useState(''); //邮箱
+
   const navigate = useNavigate();
 
   /*const handleRegister = (e) => {
@@ -17,15 +21,21 @@ const Register = () => {
     }
   };*/
   const handleRegister = async (e) => {
+
   e.preventDefault();
+  if (password !== password2) {
+  alert('两次输入的密码不一致');
+  return;
+  }
   try {
     const res = await fetch('http://localhost:5000/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ username,email, password ,isAdmin:false}), // 可能有问题
     });
 
     const data = await res.json();
+    
 
     if (res.ok) {
       alert('注册成功');
@@ -60,6 +70,24 @@ const Register = () => {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
+
+
+        {/* 新增：邮箱输入框 */}
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              邮箱
+            </label>
+            <input
+              id="email"
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)} // 绑定邮箱状态
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
               密码
@@ -73,6 +101,21 @@ const Register = () => {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
+    
+          <div> 
+  <label htmlFor="password2" className="block text-sm font-medium text-gray-700 mb-1">
+    确认密码
+  </label>
+  <input
+    id="password2"
+    type="password"
+    placeholder="Confirm Password"
+    value={password2}
+    onChange={(e) => setPassword2(e.target.value)} //  绑定状态
+    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+     </div>
+
           <button
             type="submit"
             className="w-full bg-green-600 hover:bg-green-700 text-black font-semibold py-2 px-4 rounded-lg transition duration-200"

@@ -30,6 +30,12 @@ const Login = ({ onLogin }) => {
 
     if (res.ok) {
       onLogin(username);
+
+
+      //localStorage.setItem('user', JSON.stringify(data.user)); // 存储用户信息
+      console.log('登录返回数据:', data);
+      localStorage.setItem('user', JSON.stringify(data.user)); //  确保 data.user 存在
+
       navigate('/dashboard');
     } else {
       alert(data.msg || '登录失败');
