@@ -29,7 +29,8 @@ const Login = ({ onLogin }) => {
     const data = await res.json();
 
     if (res.ok) {
-      onLogin(username);
+      //const user = data.user.username; 
+      onLogin(data.user);
 
 
       //localStorage.setItem('user', JSON.stringify(data.user)); // 存储用户信息

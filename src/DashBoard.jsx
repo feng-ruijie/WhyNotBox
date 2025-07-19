@@ -22,9 +22,9 @@ const Dashboard = ({ username, onLogout }) => {
 
   return (
     <div>
-      <h2>Welcome, {username}!</h2>
+      <h2>Welcome, {user?.username}!</h2>
       <button onClick={handleLogout}>Logout</button>
-      {user?.isAdmin ? (  // ✅ 现在 user 是定义好的
+      {user?.isAdmin ? (
         <p>您是管理员，拥有最高权限。</p>
       ) : (
         <p>您是普通用户。</p>

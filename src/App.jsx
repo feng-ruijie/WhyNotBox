@@ -8,30 +8,46 @@ import Register from './Register'; // 引入注册页面
 import './App.css';
 
 const App = () => {
-  const [username, setUsername] = useState(null);
+  // 从 localStorage 中读取用户对象
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem('user');
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
 
-  const handleLogin = (user) => {
-    setUsername(user);
+  const handleLogin = (userData) => {
+    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData)); // 存储完整用户对象
   };
 
   const handleLogout = () => {
-    setUsername(null);
+    setUser(null);
+    localStorage.removeItem('user'); // 移除用户对象
   };
-
   return (
     <Router>
       <div className="min-h-screen bg-gray-50">
         {/* 页面内容 */}
         <main className="container mx-auto p-6">
           <Routes>
-            <Route
+
+            {/*<Route
               path="/login"
-              element={!username ? <Login onLogin={handleLogin} /> : <Navigate to="/dashboard" />}
+              element={!user ? <Login onLogin={handleLogin} /> : <Navigate to="/dashboard" />}
             />
             <Route
               path="/dashboard"
-              element={username ? <Dashboard username={username} onLogout={handleLogout} /> : <Navigate to="/login" />}
+              element={user ? <Dashboard username={username} onLogout={handleLogout} /> : <Navigate to="/login" />}
+            />*/}
+
+            <Route
+            path="/login"
+            element={!user ? <Login onLogin={handleLogin} /> : <Navigate to="/dashboard" />}
             />
+            <Route
+            path="/dashboard"
+            element={user ? <Dashboard user={user} onLogout={handleLogout} /> : <Navigate to="/login" />}
+            />
+
             <Route path="/register" element={<Register />} />
             <Route path="*" element={<Navigate to="/login" />} />
           </Routes>
