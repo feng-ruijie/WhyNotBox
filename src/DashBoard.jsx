@@ -7,6 +7,15 @@ import TopNavigation from './components/TopNavigation'; // 引入新组件
 import './index.css';
 const DashBoard = ({ user, onLogout }) => {
   const navigate = useNavigate();
+
+
+  const handleLogoutClick = () => {
+    if (onLogout) {
+      onLogout(); // ✅ 调用父组件传入的onLogout
+    } else {
+      navigate('/login'); // ✅ 降级处理
+    }
+  };
   {/*背景图区域 */}
   return (
     <div 
@@ -26,7 +35,7 @@ const DashBoard = ({ user, onLogout }) => {
 
   {/* 底部退出按钮 */}
   <div className="container mx-auto px-6 pb-10">
-    <button className="red-button">退出登录</button>
+    <button className="red-button" onClick={handleLogoutClick}>退出登录</button>
   </div>
 </div>
   );

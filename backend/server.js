@@ -3,6 +3,7 @@ const sequelize = require('./config/db');
 const authRoutes = require('./routes/auth');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const blindBoxRoutes = require('./routes/blindBox');
 
 dotenv.config();
 
@@ -24,3 +25,4 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`服务器运行在 http://localhost:${PORT}`);
 });
+app.use('/api', blindBoxRoutes); // 添加这行

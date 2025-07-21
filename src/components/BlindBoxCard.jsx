@@ -1,0 +1,43 @@
+// components/BlindBoxCard.jsx
+import React from 'react';
+
+const BlindBoxCard = ({ box }) => {
+  return (
+    <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
+      <div className="relative">
+        <img 
+          src={box.image} 
+          alt={box.name} 
+          className="w-full h-48 object-cover"
+        />
+        {box.isRecommended && (
+          <span className="absolute top-2 left-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded">
+            推荐
+          </span>
+        )}
+        {box.isNew && (
+          <span className="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
+            新品
+          </span>
+        )}
+      </div>
+      <div className="p-4">
+        <h3 className="font-semibold text-lg">{box.name}</h3>
+        <div className="flex justify-between items-center mt-2">
+          <span className="text-blue-600 font-bold">¥{box.price}</span>
+          <span className="text-gray-500 text-sm">{box.remaining}个剩余</span>
+        </div>
+        <div className="mt-3 flex justify-between">
+          <button className="bg-blue-400 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors">
+            详情
+          </button>
+          <button className="bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700 transition-colors">
+            立即购买
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default BlindBoxCard;

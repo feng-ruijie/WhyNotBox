@@ -5,6 +5,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import Login from './Login';
 import Dashboard from './DashBoard';
 import Register from './Register'; // 引入注册页面
+import BlindBoxList from './BlindBoxList'; 
 import './App.css';
 
 const App = () => {
@@ -46,6 +47,13 @@ const App = () => {
             <Route
             path="/dashboard"
             element={user ? <Dashboard user={user} onLogout={handleLogout} /> : <Navigate to="/login" />}
+            />
+
+            <Route path="/blindbox" element={<BlindBoxList />} />
+
+            <Route 
+              path="/blindbox" 
+              element={<BlindBoxList />} 
             />
 
             <Route path="/register" element={<Register />} />

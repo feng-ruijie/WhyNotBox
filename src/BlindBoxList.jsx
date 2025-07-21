@@ -1,9 +1,10 @@
 // BlindBoxList.jsx
 import React, { useState, useEffect } from 'react';
+import loginBackground from './assets/LoginBackGround.png';
 import BlindBoxCard from './components/BlindBoxCard';
 import Filters from './components/Filters';
 import Pagination from './components/Pagination';
-
+import TopNavigation from './components/TopNavigation'; // 引入新组件
 const BlindBoxList = () => {
   const [boxes, setBoxes] = useState([]);
   const [filters, setFilters] = useState({
@@ -31,7 +32,12 @@ const BlindBoxList = () => {
   }, [filters, page]);
 
   return (
-    <div className="container mx-auto px-4 py-8">
+     <div 
+  className="h-[100dvh] w-[140dvh] flex flex-col bg-cover bg-center bg-no-repeat"
+  style={{ backgroundImage: `url(${loginBackground})` }}
+>
+  {/* 顶部卡片区域 */}
+  <TopNavigation />
       {/* 筛选区 */}
       <Filters filters={filters} onChange={setFilters} />
       
@@ -50,14 +56,30 @@ const BlindBoxList = () => {
       
       {/* 分页组件 */}
       {!loading && totalPages > 1 && (
-        <Pagination 
-          currentPage={page} 
-          totalPages={totalPages} 
-          onPageChange={setPage} 
-        />
+        <div className="absolute bottom-0 left-0 right-0 flex justify-center p-4">
+      <Pagination 
+        currentPage={page} 
+        totalPages={totalPages} 
+        onPageChange={setPage} 
+      />
+    </div>
       )}
     </div>
   );
 };
+
+const mockBlindBoxes = [
+  {
+    id: 1,
+    name: '限量潮玩盲盒 #001',
+    category: '潮玩',
+    price: 299.99,
+    remaining: 58,
+    isRecommended: true,
+    isNew: true,
+    image: 'https://picsum.photos/seed/box1/400/300'
+  },
+  // 可添加更多模拟数据
+];
 
 export default BlindBoxList;
