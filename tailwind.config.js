@@ -1,4 +1,4 @@
-// tailwind.config.js
+ tailwind.config.js
 module.exports = {
   content: [
     "./index.html",
