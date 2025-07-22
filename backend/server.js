@@ -4,6 +4,8 @@ const authRoutes = require('./routes/auth');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const blindBoxRoutes = require('./routes/blindBox');
+const path = require('path');
+
 
 dotenv.config();
 
@@ -20,6 +22,8 @@ sequelize.sync({ force: false }).then(() => {
   console.log('数据库已同步');
 });
 app.use('/api', blindBoxRoutes); // 添加这行
+// 添加静态文件服务
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // 启动服务器
 const PORT = process.env.PORT || 5000;
 

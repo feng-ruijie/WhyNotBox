@@ -5,7 +5,7 @@ import BlindBoxCard from './components/BlindBoxCard';
 import Filters from './components/Filters';
 import Pagination from './components/Pagination';
 import TopNavigation from './components/TopNavigation';
-
+import { Link } from 'react-router-dom'; // 新增导入
 const ITEMS_PER_PAGE = 4; // 每页显示4个盲盒
 
 const BlindBoxList = () => {
@@ -130,47 +130,16 @@ const BlindBoxList = () => {
       {/* 顶部导航 */}
       <TopNavigation />
       
-      {/* 新增表单（仅管理员可见） */}
       {isAdmin && (
-        <div className="mb-8 p-4 backdrop-blur-sm">
-          <h2 className="text-xl font-bold mb-4">新增盲盒</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-            <input 
-              value={newBox.name} 
-              onChange={(e) => setNewBox({...newBox, name: e.target.value})}
-              placeholder="名称"
-              className="border p-2 rounded"
-            />
-            <input 
-              type="number" 
-              value={newBox.price} 
-              onChange={(e) => setNewBox({...newBox, price: parseFloat(e.target.value)})}
-              placeholder="价格"
-              className="border p-2 rounded"
-            />
-            <input 
-              type="number" 
-              value={newBox.remaining} 
-              onChange={(e) => setNewBox({...newBox, remaining: parseInt(e.target.value)})}
-              placeholder="剩余量"
-              className="border p-2 rounded"
-            />
-            <input 
-              value={newBox.image} 
-              onChange={(e) => setNewBox({...newBox, image: e.target.value})}
-              placeholder="图片URL"
-              className="border p-2 rounded"
-            />
-          </div>
-          <button 
-            onClick={handleCreateBox}
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-          >
-            创建盲盒
-          </button>
-        </div>
-      )}
-
+  <div className="mb-8 p-4 backdrop-blur-sm">
+    <Link 
+      to="/add-blindbox"
+      className="bg-green-600 !!text-white px-4 py-2 rounded hover:bg-green-700 "
+    >
+      添加盲盒
+    </Link>
+  </div>
+)}
       {/* 筛选区 */}
       <Filters filters={filters} onChange={setFilters} />
       

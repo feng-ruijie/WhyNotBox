@@ -1,5 +1,13 @@
 // backend/controllers/BlindBoxController.js
 const BlindBox = require('../models/BlindBox');
+const fs = require('fs');
+const path = require('path');
+
+// 确保uploads目录存在
+const uploadDir = path.resolve(__dirname, '../../uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 
 
@@ -16,6 +24,7 @@ exports.getAll = async (req, res) => {
 exports.createBlindBox = async (req, res) => {
   try {
     const { name, price, remaining, description, isRecommended, isNew, image } = req.body;
+    const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
     
     const newBox = await BlindBox.create({
       name,
@@ -24,7 +33,9 @@ exports.createBlindBox = async (req, res) => {
       description,
       isRecommended,
       isNew,
-      image
+      image : imagePath,
+      createdAt: new Date(), // 显式设置时间戳（如果模型中未启用）
+      updatedAt: new Date()
     });
     
     res.status(201).json(newBox);

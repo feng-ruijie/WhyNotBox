@@ -39,6 +39,17 @@ const BlindBox = sequelize.define('BlindBox', {
 }, {
   tableName: 'blind_boxes',
   timestamps: true
+},{
+  tableName: 'blind_boxes',
+  timestamps: true, // 显式启用时间戳
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+});
+
+
+// 同步模型
+sequelize.sync({ alter: true }).catch(err => {
+  console.error('模型同步失败:', err);
 });
 
 module.exports = BlindBox;

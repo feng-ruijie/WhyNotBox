@@ -1,7 +1,12 @@
 // components/BlindBoxCard.jsx
 import React from 'react';
+const BLIND_BOX_PLACEHOLDER = 'https://via.placeholder.com/300x200?text=No+Image';
 
 const BlindBoxCard = ({ box , onDelete , isAdmin}) => {
+   const imageUrl = box.image 
+    ? `http://localhost:5000${box.image}` 
+    : BLIND_BOX_PLACEHOLDER;
+
   const handleDelete = async () => {
     if (isAdmin) { // ✅ 使用传入的 isAdmin
       if (window.confirm('确定要删除这个盲盒吗？')) {
@@ -37,9 +42,14 @@ const BlindBoxCard = ({ box , onDelete , isAdmin}) => {
       
       <div className="relative">
         <img 
-          src={box.image} 
-          alt={box.name} 
+          src={imageUrl} 
+          alt={box.name || '盲盒图片'} 
           className="w-full h-48 object-cover"
+          onLoad={() => setIsLoading(false)}
+          onError={(e) => {
+            e.target.src = BLIND_BOX_PLACEHOLDER;
+            setIsLoading(false);
+          }}
         />
         {box.isRecommended && (
           <span className="absolute top-2 left-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded">
