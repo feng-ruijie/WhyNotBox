@@ -1,6 +1,17 @@
 // backend/controllers/BlindBoxController.js
 const BlindBox = require('../models/BlindBox');
 
+
+
+exports.getAll = async (req, res) => {
+  try {
+    const boxes = await BlindBox.findAll(); // 使用模型的 findAll 方法
+    res.json(boxes);
+  } catch (error) {
+    res.status(500).json({ error: '获取盲盒列表失败' });
+  }
+};
+
 // 新增盲盒
 exports.createBlindBox = async (req, res) => {
   try {

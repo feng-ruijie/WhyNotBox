@@ -1,9 +1,40 @@
 // components/BlindBoxCard.jsx
 import React from 'react';
 
-const BlindBoxCard = ({ box }) => {
+const BlindBoxCard = ({ box , onDelete , isAdmin}) => {
+  const handleDelete = async () => {
+    if (isAdmin) { // ✅ 使用传入的 isAdmin
+      if (window.confirm('确定要删除这个盲盒吗？')) {
+        try {
+          const response = await fetch(`http://localhost:5000/api/blindbox/${box.id}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if (response.ok) {
+            onDelete?.(box.id);
+          }
+        } catch (error) {
+          console.error('删除失败:', error);
+        }
+      }
+    }
+
+  };
   return (
-    <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
+    <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 relative">
+      {/* 删除按钮 */}
+      {isAdmin && (
+        <button 
+          onClick={handleDelete}
+          className="absolute top-2 right-2 bg-red-600 text-white w-6 h-6 rounded-full flex items-center justify-center z-10 hover:bg-red-700"
+        >
+          ×
+        </button>
+      )}
+      
       <div className="relative">
         <img 
           src={box.image} 
