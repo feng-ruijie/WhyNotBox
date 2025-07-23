@@ -5,13 +5,18 @@ import { useNavigate } from 'react-router-dom'; // 添加这行
 import TopNavigation from './components/TopNavigation';
 
 const AddBlindBoxPage = () => {
+  //盲盒字段
   const [newBox, setNewBox] = useState({
     name: '',
     price: '',
     remaining: '',
     description: '',
-    image: null // 修改为存储文件对象
+    image: null, // 修改为存储文件对象
+    items: [{ name: '', quantity: '', probability: '' }] //todo : image
+
   });
+
+
   const [isAdmin, setIsAdmin] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(''); // 图片预览URL
    const navigate = useNavigate();
@@ -46,42 +51,72 @@ const AddBlindBoxPage = () => {
 
   // 创建新盲盒
   const handleCreateBox = async () => {
-    if (!newBox.image) {
-      alert('请先选择图片');
-      return;
-    }
+  if (!newBox.image) {
+    alert('请先选择图片');
+    return;
+  }
 
-    const formData = new FormData();
-    formData.append('name', newBox.name);
-    formData.append('price', newBox.price);
-    formData.append('remaining', newBox.remaining);
-    formData.append('description', newBox.description);
-    formData.append('image', newBox.image); // 添加图片文件
+  // ✅ 新增：校验概率总和是否为100%
+  const totalProb = calculateTotalProbability();
+  if (Math.abs(totalProb - 100) > 0.01) {
+    alert(`物品概率总和必须为100%，当前总和为${totalProb}%`);
+    return;
+  }
 
-    try {
-      const response = await fetch('http://localhost:5000/api/blindbox', {
-        method: 'POST',
-        body: formData
-        // 注意：使用FormData时不要手动设置Content-Type
-        // 浏览器会自动设置为multipart/form-data
+  const formData = new FormData();
+  formData.append('name', newBox.name);
+  formData.append('price', newBox.price);
+  formData.append('remaining', newBox.remaining);
+  formData.append('description', newBox.description);
+  formData.append('image', newBox.image);
+  formData.append('items', JSON.stringify(newBox.items)); 
+
+  try {
+    const response = await fetch('http://localhost:5000/api/blindbox', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (response.ok) {
+      setNewBox({
+        name: '',
+        price: '',
+        remaining: '',
+        description: '',
+        image: null
       });
-      
-      if (response.ok) {
-        // 重置表单
-        setNewBox({ 
-          name: '', 
-          price: '', 
-          remaining: '', 
-          description: '', 
-          image: null 
-        });
-        navigate('/blindbox', { state: { refresh: true } });
-        // 跳转回列表页或显示成功提示
-      }
-    } catch (error) {
-      console.error('创建失败:', error);
+      navigate('/blindbox', { state: { refresh: true } });
     }
-  };
+  } catch (error) {
+    console.error('创建失败:', error);
+  }
+};
+  // 处理物品字段修改
+const handleItemChange = (index, field, value) => {
+  const updatedItems = [...newBox.items];
+  updatedItems[index] = { ...updatedItems[index], [field]: value };
+  setNewBox({ ...newBox, items: updatedItems });
+};
+
+// 计算总概率
+const calculateTotalProbability = () => {
+  return newBox.items.reduce((sum, item) => sum + (parseFloat(item.probability) || 0), 0);
+};
+
+// 添加/删除物品
+const addItem = () => {
+  setNewBox({
+    ...newBox,
+    items: [...newBox.items, { name: '', quantity: '', probability: '' }]
+  });
+};
+
+const removeItem = (index) => {
+  setNewBox({
+    ...newBox,
+    items: newBox.items.filter((_, i) => i !== index)
+  });
+};
 
   return (
     <div 
@@ -115,7 +150,55 @@ const AddBlindBoxPage = () => {
               placeholder="剩余量"
               className="border p-2 rounded"
             />
-            
+            <textarea 
+            value={newBox.description}
+            onChange={(e) => setNewBox({...newBox, description: e.target.value})}
+            placeholder="描述"
+            className="border p-2 rounded"
+            />
+
+            {/* 物品列表输入 */}
+<div className="mb-6">
+  <h3 className="text-lg font-semibold mb-2">盲盒物品</h3>
+  {newBox.items.map((item, index) => (
+    <div key={index} className="flex gap-2 mb-2">
+      <input
+        type="text"
+        placeholder="物品名称"
+        value={item.name}
+        onChange={(e) => handleItemChange(index, 'name', e.target.value)}
+        className="border p-2 rounded flex-1"
+      />
+      <input
+        type="number"
+        placeholder="概率%"
+        value={item.probability}
+        onChange={(e) => handleItemChange(index, 'probability', parseFloat(e.target.value))}
+        className="border p-2 rounded w-24"
+      />
+      <button
+        type="button"
+        onClick={() => removeItem(index)}
+        className="bg-red-500 text-white p-2 rounded"
+      >
+        删除
+      </button>
+    </div>
+  ))}
+
+  <button
+    type="button"
+    onClick={addItem}
+    className="bg-blue-500 text-white px-3 py-1 rounded mt-2"
+  >
+    添加物品
+  </button>
+  <div className="mt-2 text-sm text-gray-600">
+    总概率: {calculateTotalProbability()}%
+  </div>
+</div>
+
+
             {/* 文件上传控件 */}
             <div>
               <label className="block mb-2 text-sm font-medium text-gray-700">

@@ -1,8 +1,9 @@
 // components/BlindBoxCard.jsx
-import React from 'react';
+import React, { useState } from 'react';
 const BLIND_BOX_PLACEHOLDER = 'https://via.placeholder.com/300x200?text=No+Image';
 
 const BlindBoxCard = ({ box , onDelete , isAdmin}) => {
+  const [isLoading, setIsLoading] = useState(true); // ✅ 添加状态
    const imageUrl = box.image 
     ? `http://localhost:5000${box.image}` 
     : BLIND_BOX_PLACEHOLDER;

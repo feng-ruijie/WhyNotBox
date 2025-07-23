@@ -5,7 +5,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const blindBoxRoutes = require('./routes/blindBox');
 const path = require('path');
-
+const Item = require('./models/Item');
 
 dotenv.config();
 
