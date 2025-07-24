@@ -12,7 +12,8 @@ dotenv.config();
 const app = express();
 
 // 中间件
-app.use(express.json());
+//app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(cors({ origin: 'http://localhost:5173' })); // 允许前端域名
 app.use('/api/auth', authRoutes);

@@ -24,30 +24,32 @@ exports.getAll = async (req, res) => {
 // 新增盲盒
 exports.createBlindBox = async (req, res) => {
   try {
-     // 解析物品数据
-     //const itemsData = req.body.items ? JSON.parse(req.body.items) : [];
+    // ✅ 新增：正确解析 multipart/form-data 中的字段
+    const { name, price, remaining, description, isRecommended, isNew } = req.body;
     
-    // 验证概率总和
-   /* const totalProbability = itemsData.reduce((sum, item) => sum + item.probability, 0);
+    // ✅ 新增：解析物品数据（来自字符串）
+    const itemsData = req.body.items ? JSON.parse(req.body.items) : [];
+    
+    // ✅ 新增：验证概率总和
+    const totalProbability = itemsData.reduce((sum, item) => sum + item.probability, 0);
     if (Math.abs(totalProbability - 100) > 0.01) {  // 允许浮点误差
       return res.status(400).json({ error: '物品概率总和必须为100%' });
-    }*/
-   
-
-    const { name, price, remaining, description, isRecommended, isNew, image } = req.body;
+    }
+    
     const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
-       const itemsData = items ? JSON.parse(items) : [];
+    
     const newBox = await BlindBox.create({
       name,
       price,
       remaining,
       description,
-      isRecommended,
-      isNew,
-      image : imagePath,
-      createdAt: new Date(), // 显式设置时间戳（如果模型中未启用）
+      isRecommended: isRecommended === 'true' || isRecommended === true,
+      isNew: isNew === 'true' || isNew === true,
+      image: imagePath,
+      createdAt: new Date(),
       updatedAt: new Date()
     });
+    
     if (itemsData.length > 0) {
       const items = itemsData.map(item => ({
         ...item,
@@ -55,8 +57,10 @@ exports.createBlindBox = async (req, res) => {
       }));
       await Item.bulkCreate(items); // 批量创建物品
     }
+    
     res.status(201).json(newBox);
   } catch (error) {
+    console.error('创建失败:', error);
     res.status(500).json({ error: '创建盲盒失败' });
   }
 };

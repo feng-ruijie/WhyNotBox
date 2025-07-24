@@ -16,7 +16,6 @@ const AddBlindBoxPage = () => {
 
   });
 
-
   const [isAdmin, setIsAdmin] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(''); // 图片预览URL
    const navigate = useNavigate();
@@ -56,7 +55,7 @@ const AddBlindBoxPage = () => {
     return;
   }
 
-  // ✅ 新增：校验概率总和是否为100%
+  // 校验概率总和是否为100%
   const totalProb = calculateTotalProbability();
   if (Math.abs(totalProb - 100) > 0.01) {
     alert(`物品概率总和必须为100%，当前总和为${totalProb}%`);
@@ -68,9 +67,9 @@ const AddBlindBoxPage = () => {
   formData.append('price', newBox.price);
   formData.append('remaining', newBox.remaining);
   formData.append('description', newBox.description);
-  formData.append('image', newBox.image);
+  
   formData.append('items', JSON.stringify(newBox.items)); 
-
+  formData.append('image', newBox.image);
   try {
     const response = await fetch('http://localhost:5000/api/blindbox', {
       method: 'POST',
