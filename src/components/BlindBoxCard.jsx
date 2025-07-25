@@ -1,14 +1,23 @@
 // components/BlindBoxCard.jsx
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 const BLIND_BOX_PLACEHOLDER = 'https://picsum.photos/300/200?text=No+Image';
 
+
+
 const BlindBoxCard = ({ box , onDelete , isAdmin}) => {
+  
   const [isLoading, setIsLoading] = useState(true); // ✅ 添加状态
    /*const imageUrl = box.image 
     ? `http://localhost:5000${box.image}` 
     : BLIND_BOX_PLACEHOLDER;
 */
-console.log(box.image)
+//console.log(box.image)
+ const navigate = useNavigate();
+ const handleDetailClick = () => {
+  
+  navigate(`/blindbox/${box.id}`);
+};
 const imageUrl = box.image 
   ? `http://localhost:5000${box.image}` // 添加斜杠
   : BLIND_BOX_PLACEHOLDER;
@@ -74,7 +83,10 @@ const imageUrl = box.image
           <span className="text-gray-500 text-sm">{box.remaining}个剩余</span>
         </div>
         <div className="mt-3 flex justify-between">
-          <button className="bg-blue-400 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors">
+          <button
+            className="bg-blue-400 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors"
+            onClick={handleDetailClick}
+          >
             详情
           </button>
           <button className="bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700 transition-colors">

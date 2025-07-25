@@ -162,6 +162,22 @@ console.log('上传的文件:', req.files); // ✅ 调试输出
     });
   }
 };
+const getById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const box = await BlindBox.findByPk(id, {
+      include: [{ model: Item, as: 'items' }]
+    });
+
+    if (!box) {
+      return res.status(404).json({ error: '未找到该盲盒' });
+    }
+
+    res.json(box);
+  } catch (error) {
+    res.status(500).json({ error: '获取盲盒详情失败' });
+  }
+};
 
 // 删除盲盒
 const deleteBlindBox = async (req, res) => {
@@ -210,5 +226,6 @@ module.exports = {
   upload,
   createBlindBox,
   getAll,
-  deleteBlindBox
+  deleteBlindBox,
+  getById
 };

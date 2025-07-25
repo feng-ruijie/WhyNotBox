@@ -7,6 +7,7 @@ const multer = require('multer'); //  确保正确引入
 const path = require('path'); // 新增路径模块
 
 
+router.get('/blindbox/:id', blindBoxController.getById);
 
 // 配置文件存储
 const storage = multer.diskStorage({
@@ -19,7 +20,8 @@ const storage = multer.diskStorage({
   }
 });
 
-
+// 得到单个的盲盒
+router.get('/blindbox/:id', blindBoxController.getById);
 
 //查询盲盒
 router.get('/blindbox', blindBoxController.getAll); // 无前缀

@@ -1,7 +1,6 @@
 // backend/models/Item.js
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
-const BlindBox = require('./BlindBox');
 
 const Item = sequelize.define('Item', {
   id: {
@@ -28,11 +27,14 @@ const Item = sequelize.define('Item', {
   
 }, {
   tableName: 'items',
+  modelName: 'Item',
   timestamps: true
 });
 
 // 建立关联
-BlindBox.hasMany(Item, { foreignKey: 'blindBoxId' });
-Item.belongsTo(BlindBox, { foreignKey: 'blindBoxId' });
+/*Item.belongsTo('BlindBox', {
+  as: 'blindBox',
+  foreignKey: 'blindBoxId'
+});*/
 
 module.exports = Item;

@@ -8,7 +8,7 @@ import Register from './Register'; // 引入注册页面
 import BlindBoxList from './BlindBoxList'; 
 import './App.css';
 import AddBlindBoxPage from './AddBlindBoxPage'; // 新增导入
-
+import BlindBoxDetail from './BlindBoxDetail';
 const App = () => {
   // 从 localStorage 中读取用户对象
   const [user, setUser] = useState(() => {
@@ -51,11 +51,10 @@ const App = () => {
             />
 
             <Route path="/blindbox" element={<BlindBoxList />} />
-
-            <Route 
-              path="/blindbox" 
-              element={<BlindBoxList />} 
-            />
+              
+            
+            <Route path="/blindbox/:id" element={<BlindBoxDetail />} />
+            
              <Route path="/add-blindbox" element={<AddBlindBoxPage />} /> {/* 新增路由 */}
             <Route path="/register" element={<Register />} />
             <Route path="*" element={<Navigate to="/login" />} />

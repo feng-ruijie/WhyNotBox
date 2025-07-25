@@ -8,7 +8,7 @@ const TopNavigation = () => {
   const buttons = [
     { title: '盲盒列表', path: '/blindbox' },
     { title: '订单管理', path: '/order' },
-    { title: '活动管理', path: '/activity' },
+    { title: '首页', path: '/DashBoard' },
     { title: '玩家秀', path: '/community' },
     { title: '个人中心', path: '/profile' }
   ];
