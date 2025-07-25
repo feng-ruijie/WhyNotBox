@@ -36,10 +36,8 @@ const BlindBox = sequelize.define('BlindBox', {
     type: DataTypes.STRING,
     allowNull: false
   }
-}, {
-  tableName: 'blind_boxes',
-  timestamps: true
-},{
+},
+{
   tableName: 'blind_boxes',
   timestamps: true, // 显式启用时间戳
   createdAt: 'createdAt',

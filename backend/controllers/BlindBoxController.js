@@ -3,18 +3,58 @@ const BlindBox = require('../models/BlindBox');
 const Item = require('../models/Item');
 const fs = require('fs');
 const path = require('path');
+const multer = require('multer');
 
-// 确保uploads目录存在
+
 const uploadDir = path.resolve(__dirname, '../../uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
 
 
+//const { upload } = require('../controllers/BlindBoxController');
+// 配置文件上传存储
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    //const uploadDir = path.resolve(__dirname, '../../uploads') ;
+    //const uploadDir = path.join(__dirname, '../../uploads');  //关键位置
 
-exports.getAll = async (req, res) => {
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    // 使用时间戳+原始扩展名防止重名
+    const ext = path.extname(file.originalname);
+    cb(null, `${Date.now()}-${file.fieldname}${ext}`);
+  }
+});
+
+// 文件过滤器
+const fileFilter = (req, file, cb) => {
+  // 仅允许图片文件
+  if (file.mimetype.startsWith('image/')) {
+    cb(null, true);
+  } else {
+    cb(new Error(`不支持的文件类型：${file.fieldname}`), false);
+  }
+};
+
+// 初始化multer配置
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: { 
+    fileSize: 5 * 1024 * 1024, // 5MB限制
+    files: 21 // 最大文件数（1个盲盒图+20个物品图）
+  }
+}).fields([
+  { name: 'image', maxCount: 1 },       // 盲盒主图
+  { name: 'itemImages', maxCount: 20 }  // 物品图片（最多20个）
+]);
+
+// 获取所有盲盒
+const getAll = async (req, res) => {
   try {
-    const boxes = await BlindBox.findAll(); // 使用模型的 findAll 方法
+    const boxes = await BlindBox.findAll();
     res.json(boxes);
   } catch (error) {
     res.status(500).json({ error: '获取盲盒列表失败' });
@@ -22,51 +62,109 @@ exports.getAll = async (req, res) => {
 };
 
 // 新增盲盒
-exports.createBlindBox = async (req, res) => {
+const createBlindBox = async (req, res) => {
   try {
-    // ✅ 新增：正确解析 multipart/form-data 中的字段
-    const { name, price, remaining, description, isRecommended, isNew } = req.body;
-    
-    // ✅ 新增：解析物品数据（来自字符串）
-    const itemsData = req.body.items ? JSON.parse(req.body.items) : [];
-    
-    // ✅ 新增：验证概率总和
-    const totalProbability = itemsData.reduce((sum, item) => sum + item.probability, 0);
-    if (Math.abs(totalProbability - 100) > 0.01) {  // 允许浮点误差
-      return res.status(400).json({ error: '物品概率总和必须为100%' });
+    // 解析表单数据
+    const { 
+      name, 
+      price, 
+      remaining, 
+      description, 
+      isRecommended, 
+      isNew 
+    } = req.body;
+
+    // 解析物品数据
+    let itemsData = [];
+    try {
+      itemsData = req.body.items ? JSON.parse(req.body.items) : [];
+    } catch (error) {
+      return res.status(400).json({ error: '物品数据格式错误' });
     }
+
+    // 验证概率总和
+    const totalProbability = itemsData.reduce(
+      (sum, item) => sum + parseFloat(item.probability || 0), 0
+    );
+    if (Math.abs(totalProbability - 100) > 0.01) {
+      return res.status(400).json({ 
+        error: `物品概率总和必须为100%（当前：${totalProbability.toFixed(2)}%）` 
+      });
+    }
+
+    // 处理文件上传
+    const itemImages = req.files?.itemImages || [];
     
-    const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
+    // 验证物品与图片数量匹配
+    if (itemsData.length !== itemImages.length) {
+      return res.status(400).json({ 
+        error: `物品数量(${itemsData.length})与图片数量(${itemImages.length})不匹配` 
+      });
+    }
+
+    // 构建物品数据
+    const itemsWithImages = itemsData.map((item, index) => ({
+      ...item,
+      image: itemImages[index] 
+        ? `/uploads/${path.basename(itemImages[index].path)}`
+        : null,
+      blindBoxId: null // 占位符
+    }));
     
+    // 处理盲盒主图
+    const imagePath = req.files?.image?.[0] 
+      ? `/uploads/${path.basename(req.files.image[0].path)}`
+      : null;
+
+    /*const imagePath = req.files?.image?.[0] 
+  ? `uploads/${path.basename(req.files.image[0].path)}` // 去掉前导斜杠
+  : null;*/
+    // 创建盲盒
     const newBox = await BlindBox.create({
       name,
-      price,
-      remaining,
+      price: parseFloat(price),
+      remaining: parseInt(remaining),
       description,
-      isRecommended: isRecommended === 'true' || isRecommended === true,
-      isNew: isNew === 'true' || isNew === true,
-      image: imagePath,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      isRecommended: isBoolean(isRecommended),
+      isNew: isBoolean(isNew),
+      image: imagePath
     });
-    
-    if (itemsData.length > 0) {
-      const items = itemsData.map(item => ({
+
+    // 创建关联物品
+    if (itemsWithImages.length > 0) {
+      const items = itemsWithImages.map(item => ({
         ...item,
-        blindBoxId: newBox.id // 设置外键
+        blindBoxId: newBox.id,
+        image:item.image,
+        probability: parseFloat(item.probability)
       }));
-      await Item.bulkCreate(items); // 批量创建物品
+      
+      if (items.some(item => !item.name || isNaN(item.probability))) {
+      return res.status(400).json({ error: '物品数据必须包含有效名称和概率' });
+   }
+
+  
+
+
+      await Item.bulkCreate(items);
     }
-    
-    res.status(201).json(newBox);
+console.log('文件存储路径:', uploadDir); // ✅ 调试输出
+console.log('上传的文件:', req.files); // ✅ 调试输出
+    res.status(201).json({
+      ...newBox.toJSON(),
+      items: itemsWithImages
+    });
   } catch (error) {
     console.error('创建失败:', error);
-    res.status(500).json({ error: '创建盲盒失败' });
+    res.status(500).json({ 
+      error: '创建盲盒失败',
+      details: error.message
+    });
   }
 };
 
 // 删除盲盒
-exports.deleteBlindBox = async (req, res) => {
+const deleteBlindBox = async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -75,9 +173,42 @@ exports.deleteBlindBox = async (req, res) => {
       return res.status(404).json({ error: '未找到该盲盒' });
     }
     
+    // 删除关联的物品图片文件
+    const items = await Item.findAll({ where: { blindBoxId: id } });
+    for (const item of items) {
+      if (item.imageUrl) {
+        const filePath = path.resolve(__dirname, '../../', item.imageUrl);
+       // const filePath = path.join(__dirname, '../../uploads', path.basename(item.imageUrl));
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      }
+    }
+
+    // 删除盲盒主图
+    if (box.image) {
+      const filePath = path.resolve(__dirname, '../../', box.image);
+     // const filePath = path.join(__dirname, '../../uploads', path.basename(item.imageUrl));
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
+    }
+
+    // 删除数据库记录
     await box.destroy();
     res.json({ message: '盲盒已删除' });
   } catch (error) {
     res.status(500).json({ error: '删除盲盒失败' });
   }
+};
+
+// 辅助函数：安全转换布尔值
+function isBoolean(value) {
+  return value === 'true' || value === true;
+}
+module.exports = {
+  upload,
+  createBlindBox,
+  getAll,
+  deleteBlindBox
 };

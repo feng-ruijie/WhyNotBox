@@ -20,7 +20,12 @@ const Item = sequelize.define('Item', {
   probability: {
     type: DataTypes.FLOAT,
     allowNull: false
+  },
+  image:{
+    type: DataTypes.STRING,
+    allowNull: true
   }
+  
 }, {
   tableName: 'items',
   timestamps: true

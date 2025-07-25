@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 
 // 注册
 exports.register = async (req, res) => {
-  const { username, email,password  } = req.body;
+  const { username, email,password ,isAdmin } = req.body;
 
   try {
     const existingUser = await User.findOne({ where: { username } });

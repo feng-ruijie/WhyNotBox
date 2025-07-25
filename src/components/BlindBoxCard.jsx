@@ -1,13 +1,17 @@
 // components/BlindBoxCard.jsx
 import React, { useState } from 'react';
-const BLIND_BOX_PLACEHOLDER = 'https://via.placeholder.com/300x200?text=No+Image';
+const BLIND_BOX_PLACEHOLDER = 'https://picsum.photos/300/200?text=No+Image';
 
 const BlindBoxCard = ({ box , onDelete , isAdmin}) => {
   const [isLoading, setIsLoading] = useState(true); // ✅ 添加状态
-   const imageUrl = box.image 
+   /*const imageUrl = box.image 
     ? `http://localhost:5000${box.image}` 
     : BLIND_BOX_PLACEHOLDER;
-
+*/
+console.log(box.image)
+const imageUrl = box.image 
+  ? `http://localhost:5000${box.image}` // 添加斜杠
+  : BLIND_BOX_PLACEHOLDER;
   const handleDelete = async () => {
     if (isAdmin) { // ✅ 使用传入的 isAdmin
       if (window.confirm('确定要删除这个盲盒吗？')) {

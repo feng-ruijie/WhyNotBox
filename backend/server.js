@@ -1,21 +1,25 @@
-const express = require('express');
+
 const sequelize = require('./config/db');
 const authRoutes = require('./routes/auth');
+
 const cors = require('cors');
 const dotenv = require('dotenv');
 const blindBoxRoutes = require('./routes/blindBox');
 const path = require('path');
 const Item = require('./models/Item');
 
+
 dotenv.config();
 
+const express = require('express');
 const app = express();
 
+app.use(express.json());
 // 中间件
-//app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
-app.use(cors({ origin: 'http://localhost:5173' })); // 允许前端域名
+
+
+app.use(cors()); // 允许前端域名
 app.use('/api/auth', authRoutes);
 
 // 同步数据库
@@ -24,7 +28,8 @@ sequelize.sync({ force: false }).then(() => {
 });
 app.use('/api', blindBoxRoutes); // 添加这行
 // 添加静态文件服务
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.resolve(__dirname, '../uploads')));
+//app.use('/uploads', path.join(__dirname, 'uploads'));
 // 启动服务器
 const PORT = process.env.PORT || 5000;
 

@@ -12,10 +12,10 @@ const AddBlindBoxPage = () => {
     remaining: '',
     description: '',
     image: null, // 修改为存储文件对象
-    items: [{ name: '', quantity: '', probability: '' }] //todo : image
+    items: [{ name: '', quantity:'',probability: '' }] //todo : image
 
   });
-
+const [itemImagePreviews, setItemImagePreviews] = useState([]); // 新增：物品图片预览数组
   const [isAdmin, setIsAdmin] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(''); // 图片预览URL
    const navigate = useNavigate();
@@ -31,6 +31,27 @@ const AddBlindBoxPage = () => {
       }
     }
   }, []);
+  // src/AddBlindBoxPage.jsx
+const handleItemImageChange = (index, e) => {
+  const file = e.target.files[0];
+  if (file) {
+    // 更新物品图片状态
+    const updatedItems = [...newBox.items];
+    updatedItems[index].image = file;
+    setNewBox({ ...newBox, items: updatedItems });
+    
+    // 更新预览
+    const newPreviews = [...itemImagePreviews];
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      newPreviews[index] = e.target.result;
+      setItemImagePreviews(newPreviews);
+    };
+    reader.readAsDataURL(file);
+  }
+};
+
+
 
   // 处理文件选择
   const handleImageChange = (e) => {
@@ -70,6 +91,13 @@ const AddBlindBoxPage = () => {
   
   formData.append('items', JSON.stringify(newBox.items)); 
   formData.append('image', newBox.image);
+
+
+  newBox.items.forEach((item, index) => {
+    if (item.image) {
+      formData.append('itemImages', item.image);
+    }
+  });
   try {
     const response = await fetch('http://localhost:5000/api/blindbox', {
       method: 'POST',
@@ -182,6 +210,26 @@ const removeItem = (index) => {
       >
         删除
       </button>
+      <div className="w-full">
+          <label className="block mb-1 text-xs text-gray-600">
+            物品图片
+          </label>
+          <input 
+            type="file"
+            accept="image/*"
+            onChange={(e) => handleItemImageChange(index, e)}
+            className="block w-full text-sm text-gray-500 file:mr-4 file:py-1 file:px-3 
+              file:rounded file:border-0 file:text-xs file:font-semibold
+              file:bg-blue-500 file:text-white hover:file:bg-blue-600"
+          />
+          {/* 图片预览 */}
+          {itemImagePreviews[index] && (
+            <img src={itemImagePreviews[index]} 
+              alt="物品预览" 
+              className="mt-1 h-16 w-16 object-cover rounded"
+            />
+          )}
+        </div>
     </div>
   ))}
 
@@ -234,7 +282,10 @@ const removeItem = (index) => {
           >
             创建盲盒
           </button>
+
+          
         </div>
+
       )}
     </div>
   );
