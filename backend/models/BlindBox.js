@@ -44,11 +44,13 @@ const BlindBox = sequelize.define('BlindBox', {
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 });
-/*BlindBox.hasMany('Item', {
-  as: 'items',
-  foreignKey: 'blindBoxId'
-});
-*/
+ BlindBox.associate = (models) => {
+    BlindBox.hasMany(models.Item, {
+      as: 'items',
+      foreignKey: 'blindBoxId'
+    });
+  };
+
 // 同步模型
 
 module.exports = BlindBox;

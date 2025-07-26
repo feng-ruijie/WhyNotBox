@@ -14,7 +14,7 @@ const Item = sequelize.define('Item', {
   },
   quantity: {
     type: DataTypes.INTEGER,
-    allowNull: false
+    allowNull: true
   },
   probability: {
     type: DataTypes.FLOAT,
@@ -23,8 +23,15 @@ const Item = sequelize.define('Item', {
   image:{
     type: DataTypes.STRING,
     allowNull: true
+  },
+  blindBoxId: {
+    type: DataTypes.INTEGER,
+    allowNull: true, // 显式定义并设置非空
+    references: {
+      model: 'blind_boxes', // 引用的表名
+      key: 'id' // 引用的主键字段
+    }
   }
-  
 }, {
   tableName: 'items',
   modelName: 'Item',

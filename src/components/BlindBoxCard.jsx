@@ -42,6 +42,39 @@ const imageUrl = box.image
     }
 
   };
+  
+  const handleBuy = async () => {
+  const userData = localStorage.getItem('user');
+  if (!userData) {
+    alert('请先登录');
+    return;
+  }
+  const user = JSON.parse(userData);
+  console.log('用户信息:', user.username );
+  try {
+    const response = await fetch(`http://localhost:5000/api/blindbox/${box.id}/buy`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ username: user.username }) //  传入 userId
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      // 更新用户余额
+      const updatedUser = { ...user, balance: data.newBalance };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      alert('购买成功');
+    } else {
+      alert(data.error || '购买失败');
+    }
+  } catch (error) {
+    console.error('购买失败:', error);
+    alert('购买失败，请重试');
+  }
+};
   return (
     <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 relative">
       {/* 删除按钮 */}
@@ -89,8 +122,11 @@ const imageUrl = box.image
           >
             详情
           </button>
-          <button className="bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700 transition-colors">
-            立即购买
+          <button
+         onClick={handleBuy}
+          className="bg-purple-600 text-white px-3 py-1 rounded text-sm hover:bg-purple-700 transition-colors"
+          >
+          立即购买
           </button>
         </div>
       </div>

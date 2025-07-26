@@ -29,6 +29,7 @@ const DashBoard = ({ user, onLogout }) => {
   <div className="flex-1 container mx-auto px-6 flex items-center">
     <div className="w-full">
       <h1 className="text-3xl font-bold text-purple">欢迎回来，{user.username}！☺️</h1>
+      <p>您的余额：{user.balance} 元</p>
       <p className="text-black mt-2">这里是盒乐不为📦️</p>
     </div>
   </div>

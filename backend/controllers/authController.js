@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 
 // 注册
 exports.register = async (req, res) => {
-  const { username, email,password ,isAdmin } = req.body;
+  const { username, email,password ,isAdmin,balance } = req.body; //important
 
   try {
     const existingUser = await User.findOne({ where: { username } });
@@ -12,7 +12,7 @@ exports.register = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await User.create({ username,email , password: hashedPassword ,isAdmin });
+    const newUser = await User.create({ username,email , password: hashedPassword ,isAdmin,balance });
 
     res.status(201).json({ msg: '注册成功', user: newUser });
   } catch (err) {
@@ -38,14 +38,11 @@ exports.login = async (req, res) => {
     //res.json({ msg: '登录成功', username });
 
      const isAdmin = username === 'admin' ? true : user.isAdmin;
-
+    const balance = user.balance;
    //修改登录接口
     res.json({ 
   msg: '登录成功', 
-  user: { 
-    username, 
-    isAdmin // 确保返回 isAdmin 字段
-  } 
+  user: user.toJSON()
 });
 
   } catch (err) {

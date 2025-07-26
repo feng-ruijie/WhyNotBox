@@ -18,24 +18,25 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
+
 app.use(cors()); // 允许前端域名
 app.use('/api/auth', authRoutes);
 
 const Item = require('./models/Item.js');
 const BlindBox = require('./models/BlindBox.js');
 
-BlindBox.hasMany(sequelize.models.Item, {
+BlindBox.hasMany(Item, {
   as: 'items',
   foreignKey: 'blindBoxId'
 });
 
-Item.belongsTo(sequelize.models.BlindBox, {
+Item.belongsTo(BlindBox, {
   as: 'blindBox',
   foreignKey: 'blindBoxId'
 });
 
 // 同步数据库
-sequelize.sync({ alter : true }).then(() => {
+sequelize.sync({ alter : false }).then(() => {
   console.log('数据库已同步');
 });
 

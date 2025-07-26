@@ -20,6 +20,10 @@ const User = sequelize.define('User', {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+  balance: { // ✅ 新增字段
+    type: DataTypes.FLOAT,
+    defaultValue: 10.0
+  }
 });
 
 module.exports = User;

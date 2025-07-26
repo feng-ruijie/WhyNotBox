@@ -4,7 +4,7 @@ const Item = require('../models/Item');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
-
+const User = require('../models/User');
 
 const uploadDir = path.resolve(__dirname, '../../uploads');
 
@@ -136,7 +136,7 @@ const createBlindBox = async (req, res) => {
         ...item,
         blindBoxId: newBox.id,
         image:item.image,
-        probability: parseFloat(item.probability)
+        probability: parseFloat(item.probability),
       }));
       
       if (items.some(item => !item.name || isNaN(item.probability))) {
@@ -179,7 +179,44 @@ const getById = async (req, res) => {
   }
 };
 
-// 删除盲盒
+//支付接口
+
+const buyBlindBox = async (req, res) => {
+  const { id: boxId } = req.params;
+  const { username } = req.body;
+  console.log(boxId);
+  try {
+    const user = await User.findOne({ where: { username } });
+    const box = await BlindBox.findByPk(boxId);
+    if (!box) {
+      return res.status(404).json({ error: '盲盒未找到' });
+    }
+    if (!user ) {
+      return res.status(404).json({ error: '用户未找到' }); // ✅ 详细提示
+    }
+    
+
+    if (user.balance < box.price) {
+      return res.status(400).json({ error: '余额不足' });
+    }
+    if(box.remaining <= 0){
+      return res.status(400).json({ error: '盲盒已售罄' });
+    }
+    const newBalance = user.balance - box.price;
+
+    // 事务处理
+    await User.update({ balance: newBalance }, { where: { username: username } });
+    await BlindBox.update({ remaining: box.remaining - 1 }, { where: { id: boxId } });
+
+    res.json({
+      message: '购买成功',
+      newBalance
+    });
+  } catch (error) {
+    console.error('购买失败:', error);
+    res.status(500).json({ error: '购买失败' });
+  }
+};// 删除盲盒
 const deleteBlindBox = async (req, res) => {
   try {
     const { id } = req.params;
@@ -227,5 +264,6 @@ module.exports = {
   createBlindBox,
   getAll,
   deleteBlindBox,
-  getById
+  getById,
+  buyBlindBox
 };

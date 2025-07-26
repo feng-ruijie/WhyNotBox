@@ -36,4 +36,7 @@ router.post('/blindbox', upload, blindBoxController.createBlindBox);
 // 删除盲盒
 router.delete('/blindbox/:id', blindBoxController.deleteBlindBox);
 
+// 添加购买路由
+router.post('/blindbox/:id/buy', blindBoxController.buyBlindBox);
+
 module.exports = router;
