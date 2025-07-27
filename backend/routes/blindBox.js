@@ -40,6 +40,12 @@ router.delete('/blindbox/:id', blindBoxController.deleteBlindBox);
 router.post('/blindbox/:id/buy', blindBoxController.buyBlindBox);
 
 
-// backend/routes/blindBox.js - 添加新路由
+// 获取用户所有订单
 router.get('/orders/:username', blindBoxController.getUserOrders);
+
+// 抽取盲盒物品
+router.post('/orders/:orderId/open', blindBoxController.openBlindBox);
+
+// 退款订单
+router.post('/orders/:orderId/refund', blindBoxController.refundOrder);
 module.exports = router;

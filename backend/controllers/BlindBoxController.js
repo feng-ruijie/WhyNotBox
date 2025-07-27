@@ -314,6 +314,152 @@ const getUserOrders = async (req, res) => {
     res.status(500).json({ error: '获取订单失败' });
   }
 };
+
+
+const openBlindBox = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { username } = req.body;
+    
+    // 查找订单
+    const order = await Order.findByPk(orderId, {
+      include: [{
+        model: BlindBox,
+        as: 'blindBox',
+        include: [{ model: Item, as: 'items' }] // 包含盲盒内的物品
+      }]
+    });
+    
+    if (!order) {
+      return res.status(404).json({ error: '订单未找到' });
+    }
+    
+    if (order.username !== username) {
+      return res.status(403).json({ error: '无权限操作此订单' });
+    }
+    
+    if (order.is_opened) {
+      return res.status(400).json({ error: '盲盒已抽取' });
+    }
+    
+    if (order.is_refunded) {
+      return res.status(400).json({ error: '订单已退款，无法抽取' });
+    }
+    
+    // 获取盲盒内的所有物品
+    const items = order.blindBox.items;
+    if (!items || items.length === 0) {
+      return res.status(400).json({ error: '盲盒内没有物品' });
+    }
+    
+    // 根据概率随机选择一个物品
+    const totalProbability = items.reduce((sum, item) => sum + parseFloat(item.probability || 0), 0);
+    let randomValue = Math.random() * totalProbability;
+    
+    let selectedItem = null;
+    for (const item of items) {
+      randomValue -= parseFloat(item.probability);
+      if (randomValue <= 0) {
+        selectedItem = item;
+        break;
+      }
+    }
+    
+    // 如果因为浮点数精度问题没有选中物品，则选择最后一个
+    if (!selectedItem) {
+      selectedItem = items[items.length - 1];
+    }
+    
+    // 更新订单状态
+    await order.update({
+      is_opened: true,
+      opened_item_id: selectedItem.id
+    });
+    
+    res.json({
+      message: '抽取成功',
+      item: selectedItem
+    });
+    
+  } catch (error) {
+    console.error('抽取失败:', error);
+    res.status(500).json({ error: '抽取失败' });
+  }
+};
+
+// 退款功能
+const refundOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { username } = req.body;
+    
+    // 查找订单
+    const order = await Order.findByPk(orderId, {
+      include: [{
+        model: BlindBox,
+        as: 'blindBox'
+      }]
+    });
+    
+    if (!order) {
+      return res.status(404).json({ error: '订单未找到' });
+    }
+    
+    if (order.username !== username) {
+      return res.status(403).json({ error: '无权限操作此订单' });
+    }
+    
+    if (order.is_refunded) {
+      return res.status(400).json({ error: '订单已退款' });
+    }
+    
+    if (order.is_opened) {
+      return res.status(400).json({ error: '盲盒已抽取，无法退款' });
+    }
+    
+    // 查找用户
+    const user = await User.findOne({ where: { username } });
+    if (!user) {
+      return res.status(404).json({ error: '用户未找到' });
+    }
+    
+    // 开启事务
+    const transaction = await sequelize.transaction();
+    
+    try {
+      // 退还金额给用户
+      const newBalance = user.balance + order.price;
+      await User.update(
+        { balance: newBalance },
+        { where: { username }, transaction }
+      );
+      await BlindBox.update(
+        { remaining: order.blindBox.remaining + 1 },
+        { where: { id: order.blind_box_id }, transaction }
+      );
+      // 更新订单状态
+      await order.update(
+        { is_refunded: true },
+        { transaction }
+      );
+      
+      await transaction.commit();
+      
+      res.json({
+        message: '退款成功',
+        newBalance
+      });
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
+    
+  } catch (error) {
+    console.error('退款失败:', error);
+    res.status(500).json({ error: '退款失败' });
+  }
+};
+
 // 辅助函数：安全转换布尔值
 function isBoolean(value) {
   return value === 'true' || value === true;
@@ -326,4 +472,6 @@ module.exports = {
   getById,
   buyBlindBox,
   getUserOrders,
+  openBlindBox, 
+  refundOrder    
 };
