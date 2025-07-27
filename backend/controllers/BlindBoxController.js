@@ -294,6 +294,26 @@ const deleteBlindBox = async (req, res) => {
   }
 };
 
+const getUserOrders = async (req, res) => {
+  try {
+    const { username } = req.params;
+    
+    const orders = await Order.findAll({
+      where: { username },
+      include: [{
+        model: BlindBox,
+        as: 'blindBox',
+        attributes: ['name', 'image']
+      }],
+      order: [['createdAt', 'DESC']]
+    });
+
+    res.json(orders);
+  } catch (error) {
+    console.error('获取订单失败:', error);
+    res.status(500).json({ error: '获取订单失败' });
+  }
+};
 // 辅助函数：安全转换布尔值
 function isBoolean(value) {
   return value === 'true' || value === true;
@@ -304,5 +324,6 @@ module.exports = {
   getAll,
   deleteBlindBox,
   getById,
-  buyBlindBox
+  buyBlindBox,
+  getUserOrders,
 };

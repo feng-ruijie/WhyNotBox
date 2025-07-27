@@ -39,4 +39,7 @@ router.delete('/blindbox/:id', blindBoxController.deleteBlindBox);
 // 添加购买路由
 router.post('/blindbox/:id/buy', blindBoxController.buyBlindBox);
 
+
+// backend/routes/blindBox.js - 添加新路由
+router.get('/orders/:username', blindBoxController.getUserOrders);
 module.exports = router;
