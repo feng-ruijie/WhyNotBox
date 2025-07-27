@@ -24,6 +24,7 @@ app.use('/api/auth', authRoutes);
 
 const Item = require('./models/Item.js');
 const BlindBox = require('./models/BlindBox.js');
+const Order = require('./models/order.js');
 
 BlindBox.hasMany(Item, {
   as: 'items',
@@ -36,7 +37,7 @@ Item.belongsTo(BlindBox, {
 });
 
 // 同步数据库
-sequelize.sync({ alter : false }).then(() => {
+sequelize.sync({ alter : true }).then(() => {
   console.log('数据库已同步');
 });
 

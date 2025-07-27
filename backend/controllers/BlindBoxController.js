@@ -4,8 +4,9 @@ const Item = require('../models/Item');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
+const sequelize = require('../config/db');
 const User = require('../models/User');
-
+const Order = require('../models/order');
 const uploadDir = path.resolve(__dirname, '../../uploads');
 
 
@@ -202,7 +203,9 @@ const buyBlindBox = async (req, res) => {
     if(box.remaining <= 0){
       return res.status(400).json({ error: '盲盒已售罄' });
     }
-    const newBalance = user.balance - box.price;
+
+
+    /*const newBalance = user.balance - box.price;
 
     // 事务处理
     await User.update({ balance: newBalance }, { where: { username: username } });
@@ -211,7 +214,43 @@ const buyBlindBox = async (req, res) => {
     res.json({
       message: '购买成功',
       newBalance
-    });
+    });*/
+      const transaction = await sequelize.transaction();
+    try {
+      // 更新用户余额和库存
+      const newBalance = user.balance - box.price;
+      await User.update(
+        { balance: newBalance },
+        { where: { username }, transaction }
+      );
+      await BlindBox.update(
+        { remaining: box.remaining - 1 },
+        { where: { id: boxId }, transaction }
+      );
+      
+      // ✅ 创建订单
+      const order = await Order.create({
+        user_id: user.id,
+        username,
+        blind_box_id: box.id,
+        price: box.price,
+        is_opened: false,
+        is_refunded: false
+      }, { transaction });
+      
+      await transaction.commit();
+      
+      res.json({
+        message: '购买成功',
+        newBalance,
+        orderId: order.id // ✅ 返回订单ID
+      });
+    } catch (error) {
+      //res.status(500).json({ message: '购买失败' });
+      await transaction.rollback();
+      throw error;
+    }
+
   } catch (error) {
     console.error('购买失败:', error);
     res.status(500).json({ error: '购买失败' });
