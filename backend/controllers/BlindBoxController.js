@@ -303,7 +303,12 @@ const getUserOrders = async (req, res) => {
       include: [{
         model: BlindBox,
         as: 'blindBox',
-        attributes: ['name', 'image']
+        attributes: ['name', 'image'],
+          include: [{
+          model: Item,
+          as: 'items',
+          attributes: ['id', 'name', 'image', 'probability']
+        }]
       }],
       order: [['createdAt', 'DESC']]
     });
