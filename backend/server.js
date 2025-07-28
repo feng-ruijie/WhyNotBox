@@ -16,8 +16,18 @@ const app = express();
 app.use(express.json());
 // 中间件
 app.use(express.urlencoded({ extended: true }));
+const fs = require('fs');
 
+const uploadDirs = [
+  path.resolve(__dirname, '../uploads'),
+  path.resolve(__dirname, '../uploads/avatars')
+];
 
+uploadDirs.forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+});
 
 app.use(cors()); // 允许前端域名
 app.use('/api/auth', authRoutes);

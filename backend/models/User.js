@@ -25,10 +25,14 @@ const User = sequelize.define('User', {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
-  balance: { // ✅ 新增字段
+  balance: { // 余额
     type: DataTypes.FLOAT,
     defaultValue: 10.0
-  }
+  },
+   avatar: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
 }, {
   tableName: 'Users',  // 硡保表名正确
   modelName: 'User',

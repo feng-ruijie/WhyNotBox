@@ -11,7 +11,7 @@ import AddBlindBoxPage from './AddBlindBoxPage'; // 新增导入
 import BlindBoxDetail from './BlindBoxDetail';
 
 import OrderManagement from './OrderManagement';
-
+import ProfilePage from './ProfilePage'; // 添加导入
 const App = () => {
   // 从 localStorage 中读取用户对象
   const [user, setUser] = useState(() => {
@@ -57,7 +57,7 @@ const App = () => {
               
             
             <Route path="/blindbox/:id" element={<BlindBoxDetail />} />
-            
+            <Route path="/profile" element={<ProfilePage />} /> {/* 添加个人中心路由 */}
              <Route path="/add-blindbox" element={<AddBlindBoxPage />} /> {/* 新增路由 */}
             <Route path="/register" element={<Register />} />
             <Route path="*" element={<Navigate to="/login" />} />
