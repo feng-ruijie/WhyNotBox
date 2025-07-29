@@ -1,4 +1,4 @@
-
+// backend/server.js
 const sequelize = require('./config/db');
 const authRoutes = require('./routes/auth');
 
@@ -18,9 +18,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const fs = require('fs');
 
+// 修正路径 - 确保目录存在
 const uploadDirs = [
   path.resolve(__dirname, '../uploads'),
-  path.resolve(__dirname, '../uploads/avatars')
+  path.resolve(__dirname, '../uploads/avatars'),
+  path.resolve(__dirname, '../uploads/posts')
 ];
 
 uploadDirs.forEach(dir => {
@@ -36,6 +38,9 @@ const Item = require('./models/Item.js');
 const BlindBox = require('./models/BlindBox.js');
 const Order = require('./models/order.js');
 const User = require('./models/User.js');
+const Post = require('./models/Post.js');
+
+// 盲盒和物品关联
 BlindBox.hasMany(Item, {
   as: 'items',
   foreignKey: 'blindBoxId'
@@ -45,6 +50,8 @@ Item.belongsTo(BlindBox, {
   as: 'blindBox',
   foreignKey: 'blindBoxId'
 });
+
+// 订单和盲盒关联
 Order.belongsTo(BlindBox, {
   as: 'blindBox',
   foreignKey: 'blind_box_id'
@@ -54,6 +61,8 @@ BlindBox.hasMany(Order, {
   as: 'orders',
   foreignKey: 'blind_box_id'
 });
+
+// 用户和订单关联
 User.hasMany(Order, {
   as: 'orders',
   foreignKey: 'user_id'
@@ -63,16 +72,30 @@ Order.belongsTo(User, {
   as: 'user',
   foreignKey: 'user_id'
 });
+
+// 用户和玩家秀关联
+User.hasMany(Post, {
+  as: 'posts',
+  foreignKey: 'userId'
+});
+
+Post.belongsTo(User, {
+  as: 'author',
+  foreignKey: 'userId'
+});
+
 // 同步数据库
 sequelize.sync({ alter : true }).then(() => {
   console.log('数据库已同步');
+}).catch(err => {
+  console.error('数据库同步失败:', err);
 });
 
-
-app.use('/api', blindBoxRoutes); // 添加这行
-// 添加静态文件服务
+const postRoutes = require('./routes/post');
+app.use('/api/posts', postRoutes);
+app.use('/api', blindBoxRoutes);
+// 添加静态文件服务 - 修正路径
 app.use('/uploads', express.static(path.resolve(__dirname, '../uploads')));
-//app.use('/uploads', path.join(__dirname, 'uploads'));
 // 启动服务器
 const PORT = process.env.PORT || 5000;
 

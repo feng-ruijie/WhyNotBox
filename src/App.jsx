@@ -12,6 +12,10 @@ import BlindBoxDetail from './BlindBoxDetail';
 
 import OrderManagement from './OrderManagement';
 import ProfilePage from './ProfilePage'; // 添加导入
+
+import CommunityPage from './CommunityPage';
+import PostDetailPage from './PostDetailPage';
+import CreatePostPage from './CreatePostPage';
 const App = () => {
   // 从 localStorage 中读取用户对象
   const [user, setUser] = useState(() => {
@@ -62,6 +66,10 @@ const App = () => {
             <Route path="/register" element={<Register />} />
             <Route path="*" element={<Navigate to="/login" />} />
             <Route path="/order" element={<OrderManagement />} />
+
+            <Route path="/community" element={<CommunityPage />} />
+            <Route path="/community/:id" element={<PostDetailPage />} />
+            <Route path="/community/create" element={<CreatePostPage />} />
           </Routes>
         </main>
       </div>
