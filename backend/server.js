@@ -5,6 +5,7 @@ const authRoutes = require('./routes/auth');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const blindBoxRoutes = require('./routes/blindBox');
+const commentRoutes = require('./routes/comment'); // 添加评论路由
 const path = require('path');
 
 
@@ -39,6 +40,7 @@ const BlindBox = require('./models/BlindBox.js');
 const Order = require('./models/order.js');
 const User = require('./models/User.js');
 const Post = require('./models/Post.js');
+const Comment = require('./models/Comment.js'); // 添加评论模型
 
 // 盲盒和物品关联
 BlindBox.hasMany(Item, {
@@ -84,6 +86,39 @@ Post.belongsTo(User, {
   foreignKey: 'userId'
 });
 
+// 玩家秀和评论关联
+Post.hasMany(Comment, {
+  foreignKey: 'postId',
+  as: 'postComments' // 修改别名避免冲突
+});
+
+Comment.belongsTo(Post, {
+  foreignKey: 'postId',
+  as: 'post'
+});
+
+// 用户和评论关联
+User.hasMany(Comment, {
+  foreignKey: 'userId',
+  as: 'userComments' // 修改别名避免冲突
+});
+
+Comment.belongsTo(User, {
+  foreignKey: 'userId',
+  as: 'author'
+});
+
+// 评论和回复关联
+Comment.hasMany(Comment, {
+  foreignKey: 'parentId',
+  as: 'replies'
+});
+
+Comment.belongsTo(Comment, {
+  foreignKey: 'parentId',
+  as: 'parent'
+});
+
 // 同步数据库
 sequelize.sync({ alter : true }).then(() => {
   console.log('数据库已同步');
@@ -93,6 +128,7 @@ sequelize.sync({ alter : true }).then(() => {
 
 const postRoutes = require('./routes/post');
 app.use('/api/posts', postRoutes);
+app.use('/api/comments', commentRoutes); // 注册评论路由
 app.use('/api', blindBoxRoutes);
 // 添加静态文件服务 - 修正路径
 app.use('/uploads', express.static(path.resolve(__dirname, '../uploads')));

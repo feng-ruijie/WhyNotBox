@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const postController = require('../controllers/postController');
+const commentController = require('../controllers/commentController'); // 添加评论控制器
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
@@ -9,7 +10,6 @@ const fs = require('fs');
 // 配置文件上传 - 修正路径
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    // 从 backend/routes 目录向上回到项目根目录，然后进入 uploads/posts
     const uploadPath = path.join(__dirname, '../../uploads/posts/');
     
     // 确保目录存在
@@ -48,5 +48,10 @@ router.get('/:id', postController.getPostById);
 
 // 创建新玩家秀（支持多图上传）
 router.post('/', upload.array('images', 3), postController.createPost);
+
+// 添加评论相关路由
+router.get('/:id/comments', commentController.getCommentsByPost);
+router.post('/comments', commentController.createComment);
+router.post('/comments/:id/like', commentController.likeComment);
 
 module.exports = router;
