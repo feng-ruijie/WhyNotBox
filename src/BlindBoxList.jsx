@@ -17,6 +17,7 @@ const BlindBoxList = () => {
     priceRange: [0, 1000],
     sort: 'newest'
   });
+  const [searchTerm, setSearchTerm] = useState(''); // 添加搜索关键词状态
   const [newBox, setNewBox] = useState({
     name: '',
     price: '',
@@ -77,12 +78,42 @@ const BlindBoxList = () => {
     }
   }, []);
 
-  // 当 filters 或 page 变化时，重新计算分页数据
+  // 当 filters、searchTerm 或 page 变化时，重新计算分页数据
   useEffect(() => {
-    const filtered = allBoxes.filter(box => {
-      // 示例筛选逻辑（可根据需要扩展）
-      return true;
+    // 应用搜索、价格范围和排序筛选
+    let filtered = [...allBoxes];
+    
+    // 搜索功能 - 根据盲盒名称匹配
+    if (searchTerm) {
+      filtered = filtered.filter(box => 
+        box.name && box.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    // 价格范围筛选
+    filtered = filtered.filter(box => {
+      const price = parseFloat(box.price);
+      return price >= parseFloat(filters.priceRange[0]) && price <= parseFloat(filters.priceRange[1]);
     });
+    
+    // 排序方式
+    switch (filters.sort) {
+      case 'price_asc':
+        filtered.sort((a, b) => parseFloat(a.price) - parseFloat(b.price));
+        break;
+      case 'price_desc':
+        filtered.sort((a, b) => parseFloat(b.price) - parseFloat(a.price));
+        break;
+      case 'popularity':
+        // 按剩余数量排序作为热门程度的近似
+        filtered.sort((a, b) => parseInt(b.remaining) - parseInt(a.remaining));
+        break;
+      case 'newest':
+      default:
+        // 默认按ID排序（最新上架）
+        filtered.sort((a, b) => b.id - a.id);
+        break;
+    }
     
     const start = (page - 1) * ITEMS_PER_PAGE;
     const end = start + ITEMS_PER_PAGE;
@@ -90,7 +121,7 @@ const BlindBoxList = () => {
     
     setBoxes(paginatedData);
     setTotalPages(Math.ceil(filtered.length / ITEMS_PER_PAGE) || 1);
-  }, [filters, page, allBoxes]);
+  }, [filters, searchTerm, page, allBoxes]);
 
   // 页面加载时获取数据
   useEffect(() => {
@@ -122,59 +153,73 @@ const BlindBoxList = () => {
   };
 
   return (
+  <div 
+    className="h-[100dvh] w-[140dvh] flex flex-col bg-cover bg-center bg-no-repeat"
+    style={{ backgroundImage: `url(${loginBackground})` }}
+  >
+    {/* 顶部导航 */}
+    <TopNavigation />
     
-    <div 
-      className="h-[100dvh] w-[140dvh] flex flex-col bg-cover bg-center bg-no-repeat"
-      style={{ backgroundImage: `url(${loginBackground})` }}
-    >
-      {/* 顶部导航 */}
-      <TopNavigation />
+    {isAdmin ? (
+      <div className="mb-8 p-4 backdrop-blur-sm">
+        <Link 
+          to="/add-blindbox"
+          className="bg-green-600 !!text-white px-4 py-2 rounded hover:bg-green-700 "
+        >
+          添加盲盒
+        </Link>
+      </div>
+    ) : (
+      // 为非管理员用户添加一些顶部间距
+      <div className="mb-6"></div>
+    )}
+    
+    {/* 筛选区 */}
+    <div className="mb-6">
+      {/* 搜索框 */}
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="搜索盲盒名称..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-1/2 px-4 py-2 border border-blue rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+        />
+      </div>
       
-      {isAdmin && (
-  <div className="mb-8 p-4 backdrop-blur-sm">
-    <Link 
-      to="/add-blindbox"
-      className="bg-green-600 !!text-white px-4 py-2 rounded hover:bg-green-700 "
-    >
-      添加盲盒
-    </Link>
-  </div>
-)}
-      {/* 筛选区 */}
       <Filters filters={filters} onChange={setFilters} />
-      
-      {/* 列表展示 */}
-      {loading ? (
-        <div className="flex justify-center py-12">加载中...</div>
-      ) : boxes.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">未找到符合条件的盲盒</div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4">
-          {boxes.map(box => (
-            <BlindBoxCard 
-              key={box.id} 
-              box={box} 
-              isAdmin={isAdmin} // 传递管理员权限
-              onDelete={() => fetchBoxes()} 
-            />
-          ))}
-        </div>
-      )}
-      
-      {/* 分页组件 */}
-      {!loading && totalPages > 1 && (
-        <div className="absolute bottom-0 left-0 right-0 flex justify-center p-4">
-          <Pagination 
-            currentPage={page} 
-            totalPages={totalPages} 
-            onPageChange={setPage} 
-          />
-        </div>
-      )}
-
-      
     </div>
-  );
+    
+    {/* 列表展示 */}
+    {loading ? (
+      <div className="flex justify-center py-12">加载中...</div>
+    ) : boxes.length === 0 ? (
+      <div className="text-center py-12 text-gray-500">未找到符合条件的盲盒</div>
+    ) : (
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4">
+        {boxes.map(box => (
+          <BlindBoxCard 
+            key={box.id} 
+            box={box} 
+            isAdmin={isAdmin} // 传递管理员权限
+            onDelete={() => fetchBoxes()} 
+          />
+        ))}
+      </div>
+    )}
+    
+    {/* 分页组件 */}
+    {!loading && totalPages > 1 && (
+      <div className="absolute bottom-0 left-0 right-0 flex justify-center p-4">
+        <Pagination 
+          currentPage={page} 
+          totalPages={totalPages} 
+          onPageChange={setPage} 
+        />
+      </div>
+    )}
+  </div>
+);
 };
 
 export default BlindBoxList;

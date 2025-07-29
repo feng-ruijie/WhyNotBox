@@ -120,7 +120,7 @@ Comment.belongsTo(Comment, {
 });
 
 // 同步数据库
-sequelize.sync({ alter : true }).then(() => {
+sequelize.sync({ alter : false }).then(() => {
   console.log('数据库已同步');
 }).catch(err => {
   console.error('数据库同步失败:', err);

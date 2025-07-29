@@ -58,7 +58,6 @@ const Filters = ({ filters, onChange }) => {
             <option value="newest">最新上架</option>
             <option value="price_asc">价格从低到高</option>
             <option value="price_desc">价格从高到低</option>
-            <option value="popularity">热门排序</option>
           </select>
         </div>
       </div>
