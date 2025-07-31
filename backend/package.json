@@ -1,9 +1,17 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "bundle": "bundle && npm run build && ncc build bootstrap.js -o build",
+    "bundle_start": "NODE_ENV=production node ./build/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "vite",
+    "build": "ncc build server.js -o build",
+    
+    "lint": "eslint .",
+    "start": "node server.js",
+    "preview": "vite preview"
   },
   "keywords": [],
   "author": "",
@@ -19,5 +27,9 @@
     "multer": "^1.4.5-lts.1",
     "sequelize": "^6.37.7",
     "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.38.3",
+    "pkg": "^5.8.1"
   }
 }

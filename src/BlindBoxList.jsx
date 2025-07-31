@@ -152,7 +152,8 @@ const BlindBoxList = () => {
     }
   };
 
-  return (
+ // 替换原来的分页组件代码部分
+return (
   <div 
     className="h-[100dvh] w-[140dvh] flex flex-col bg-cover bg-center bg-no-repeat"
     style={{ backgroundImage: `url(${loginBackground})` }}
@@ -196,27 +197,29 @@ const BlindBoxList = () => {
     ) : boxes.length === 0 ? (
       <div className="text-center py-12 text-gray-500">未找到符合条件的盲盒</div>
     ) : (
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4">
-        {boxes.map(box => (
-          <BlindBoxCard 
-            key={box.id} 
-            box={box} 
-            isAdmin={isAdmin} // 传递管理员权限
-            onDelete={() => fetchBoxes()} 
-          />
-        ))}
-      </div>
-    )}
-    
-    {/* 分页组件 */}
-    {!loading && totalPages > 1 && (
-      <div className="absolute bottom-0 left-0 right-0 flex justify-center p-4">
-        <Pagination 
-          currentPage={page} 
-          totalPages={totalPages} 
-          onPageChange={setPage} 
-        />
-      </div>
+      <>
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4">
+          {boxes.map(box => (
+            <BlindBoxCard 
+              key={box.id} 
+              box={box} 
+              isAdmin={isAdmin} // 传递管理员权限
+              onDelete={() => fetchBoxes()} 
+            />
+          ))}
+        </div>
+        
+        {/* 分页组件 - 修改为正常文档流布局 */}
+        {!loading && totalPages > 1 && (
+          <div className="flex justify-center p-4 mt-4">
+            <Pagination 
+              currentPage={page} 
+              totalPages={totalPages} 
+              onPageChange={setPage} 
+            />
+          </div>
+        )}
+      </>
     )}
   </div>
 );
