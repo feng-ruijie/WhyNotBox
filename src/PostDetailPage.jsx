@@ -347,42 +347,52 @@ const PostDetailPage = () => {
             返回
           </button>
           
-          <div className="bg-white rounded-lg shadow-md overflow-hidden">
-            {post.image && (
-              <img 
-                src={`http://localhost:5000${post.image}`} 
-                alt={post.title}
-                className="w-full h-96 object-cover"
-              />
-            )}
-            
-            <div className="p-6">
-              <h1 className="text-3xl font-bold text-gray-800 mb-2">{post.title}</h1>
-              
-              <div className="flex items-center mb-4">
-                {post.author?.avatar ? (
-                  <img 
-                    src={`http://localhost:5000${post.author.avatar}`} 
-                    alt={post.author.username}
-                    className="w-10 h-10 rounded-full mr-3"
-                  />
-        
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center mr-3">
-                    <span className="text-white font-semibold">{post.author?.username?.charAt(0)}</span>
-                  </div>
-                )}
-                <div>
-                  <p className="font-semibold text-gray-800">{post.author?.username}</p>
-                  <p className="text-gray-500 text-sm">{formatDate(post.createdAt)}</p>
-                </div>
-              </div>
-              
-              <div className="prose max-w-none text-gray-700 text-left">
-                <p>{post.content}</p>
-                </div>
-            </div>
-          </div>
+         <div className="bg-white rounded-lg shadow-md overflow-hidden">
+  <div className="p-6">
+    <h1 className="text-3xl font-bold text-gray-800 mb-2">{post.title}</h1>
+    
+    <div className="flex items-center mb-4">
+      {post.author?.avatar ? (
+        <img 
+          src={`http://localhost:5000${post.author.avatar}`} 
+          alt={post.author.username}
+          className="w-10 h-10 rounded-full mr-3"
+        />
+      ) : (
+        <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center mr-3">
+          <span className="text-white font-semibold">{post.author?.username?.charAt(0)}</span>
+        </div>
+      )}
+      <div>
+        <p className="font-semibold text-gray-800">{post.author?.username}</p>
+        <p className="text-gray-500 text-sm">{formatDate(post.createdAt)}</p>
+      </div>
+    </div>
+    
+    <div className="prose max-w-none text-gray-700 text-left">
+      <p>{post.content}</p>
+    </div>
+    
+    {/* 修改图片显示位置：放在描述内容下方，评论模块上方 */}
+    {post.images && post.images.length > 0 && (
+  <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+    {post.images.map((image, index) => (
+      <img 
+        key={index}
+        src={`http://localhost:5000${image}`} 
+        alt={`${post.title}-${index}`}
+        className="w-full h-48 object-cover rounded-lg"
+      />
+    ))}
+  </div>
+    )}
+  </div>
+</div>
+
+{/* 评论区 */}
+<div className="bg-white rounded-lg shadow-md p-6 mt-6">
+  {/* 评论区内容保持不变 */}
+</div>
           
           {/* 评论区 */}
           <div className="bg-white rounded-lg shadow-md p-6 mt-6">
